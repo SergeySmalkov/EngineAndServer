@@ -231,6 +231,9 @@ MatchingEngine_IS_TOP_LEVEL:STATIC=ON
 //Value Computed by CMake
 MatchingEngine_SOURCE_DIR:STATIC=/home/cheytakker/CLionProjects/EngineAndServer
 
+//Path to a library.
+ZMQ_LIBRARY:FILEPATH=/usr/lib/x86_64-linux-gnu/libzmq.so
+
 //The directory containing a CMake configuration file for boost_atomic.
 boost_atomic_DIR:PATH=/usr/lib/x86_64-linux-gnu/cmake/boost_atomic-1.71.0
 
@@ -242,6 +245,9 @@ boost_system_DIR:PATH=/usr/lib/x86_64-linux-gnu/cmake/boost_system-1.71.0
 
 //The directory containing a CMake configuration file for boost_thread.
 boost_thread_DIR:PATH=/usr/lib/x86_64-linux-gnu/cmake/boost_thread-1.71.0
+
+//The directory containing a CMake configuration file for cppzmq.
+cppzmq_DIR:PATH=cppzmq_DIR-NOTFOUND
 
 
 ########################

@@ -2,39 +2,36 @@
 
 #include <websocketpp/config/asio_no_tls.hpp>
 #include <websocketpp/server.hpp>
-
+#include <iostream>
+#include <chrono>
+#include <zmq.hpp>
+#include <string>
 #include <iostream>
 #include <thread>
-#include <chrono>
-
-typedef websocketpp::server<websocketpp::config::asio> server;
-
-void on_open(server* s, websocketpp::connection_hdl hdl) {
-    std::thread([s, hdl]() {
-        while (true) {
-            s->send(hdl, "Fake Data", websocketpp::frame::opcode::text);
-            std::this_thread::sleep_for(std::chrono::seconds(1));
-        }
-    }).detach();
-}
+#include "websockets_data_publisher.h"
+#include "zmq_order_listener_updater.h"
 
 int main() {
-    server print_server;
 
-    print_server.init_asio();
-
-    print_server.set_open_handler(std::bind(&on_open, &print_server, std::placeholders::_1));
-
-    print_server.listen(9002);
-    print_server.start_accept();
-
-    std::thread ws_thread([&print_server](){
-        print_server.run();
+    std::thread ws_thread([&](){
+        publish();
     });
     ws_thread.detach();
 
 
+    std::thread zmq_thread([&]() {
+        zmq_accept_orders();
+    });
+    zmq_thread.detach();
+
     while (true) {
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
+
+    // Join the zmq_thread if needed
+    zmq_thread.join();
+    ws_thread.join();
+
+    return 0;
+
 }
