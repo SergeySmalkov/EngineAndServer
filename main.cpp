@@ -28,5 +28,13 @@ int main() {
     print_server.listen(9002);
     print_server.start_accept();
 
-    print_server.run();
+    std::thread ws_thread([&print_server](){
+        print_server.run();
+    });
+    ws_thread.detach();
+
+
+    while (true) {
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
 }
