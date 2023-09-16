@@ -13,9 +13,10 @@
 #include <string>
 #include <iostream>
 #include <thread>
+#include "worker_tasks.h"
 
 
-void zmq_accept_orders(zmq::context_t& context, zmq::socket_t& update_socket) {
+void zmq_accept_orders(zmq::context_t& context, zmq::socket_t& update_socket, boost::asio::io_service& io_service) {
 
     // Socket to receive orders
     zmq::socket_t order_socket(context, zmq::socket_type::pull);
@@ -34,6 +35,9 @@ void zmq_accept_orders(zmq::context_t& context, zmq::socket_t& update_socket) {
         std::string update_msg = "NEW";
         zmq::message_t update_new(update_msg.data(), update_msg.size());
         update_socket.send(update_new, zmq::send_flags::none);
+
+        // Post the task directly to the io_service for processing
+        io_service.post(std::bind(process_order, order_data, std::ref(update_socket)));
 
     }
 }

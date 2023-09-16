@@ -1,3 +1,4 @@
+/home/cheytakker/CLionProjects/EngineAndServer/cmake-build-debug/CMakeFiles/server_lib.dir
 /home/cheytakker/CLionProjects/EngineAndServer/cmake-build-debug/CMakeFiles/MatchingEngine.dir
 /home/cheytakker/CLionProjects/EngineAndServer/cmake-build-debug/CMakeFiles/edit_cache.dir
 /home/cheytakker/CLionProjects/EngineAndServer/cmake-build-debug/CMakeFiles/rebuild_cache.dir

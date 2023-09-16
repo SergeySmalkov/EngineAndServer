@@ -40,6 +40,12 @@ include CMakeFiles/rules.ninja
 # Logical path to working directory; prefix for absolute paths.
 
 cmake_ninja_workdir = /home/cheytakker/CLionProjects/EngineAndServer/cmake-build-debug/
+
+#############################################
+# Utility command for server_lib
+
+build server_lib: phony
+
 # =============================================================================
 # Object build statements for EXECUTABLE target MatchingEngine
 
@@ -47,7 +53,7 @@ cmake_ninja_workdir = /home/cheytakker/CLionProjects/EngineAndServer/cmake-build
 #############################################
 # Order-only phony target for MatchingEngine
 
-build cmake_object_order_depends_target_MatchingEngine: phony || CMakeFiles/MatchingEngine.dir
+build cmake_object_order_depends_target_MatchingEngine: phony || server_lib
 
 build CMakeFiles/MatchingEngine.dir/main.cpp.o: CXX_COMPILER__MatchingEngine_unscanned_Debug /home/cheytakker/CLionProjects/EngineAndServer/main.cpp || cmake_object_order_depends_target_MatchingEngine
   DEFINES = -DBOOST_ALL_NO_LIB -DBOOST_ATOMIC_DYN_LINK -DBOOST_SYSTEM_DYN_LINK -DBOOST_THREAD_DYN_LINK
@@ -65,7 +71,7 @@ build CMakeFiles/MatchingEngine.dir/main.cpp.o: CXX_COMPILER__MatchingEngine_uns
 #############################################
 # Link the executable MatchingEngine
 
-build MatchingEngine: CXX_EXECUTABLE_LINKER__MatchingEngine_Debug CMakeFiles/MatchingEngine.dir/main.cpp.o | /usr/lib/x86_64-linux-gnu/libboost_system.so.1.71.0 /usr/lib/x86_64-linux-gnu/libboost_thread.so.1.71.0 /usr/lib/x86_64-linux-gnu/libzmq.so /usr/lib/x86_64-linux-gnu/libboost_atomic.so.1.71.0
+build MatchingEngine: CXX_EXECUTABLE_LINKER__MatchingEngine_Debug CMakeFiles/MatchingEngine.dir/main.cpp.o | /usr/lib/x86_64-linux-gnu/libboost_system.so.1.71.0 /usr/lib/x86_64-linux-gnu/libboost_thread.so.1.71.0 /usr/lib/x86_64-linux-gnu/libzmq.so /usr/lib/x86_64-linux-gnu/libboost_atomic.so.1.71.0 || server_lib
   FLAGS = -g
   LINK_LIBRARIES = /usr/lib/x86_64-linux-gnu/libboost_system.so.1.71.0  /usr/lib/x86_64-linux-gnu/libboost_thread.so.1.71.0  /usr/lib/x86_64-linux-gnu/libzmq.so  -lpthread  /usr/lib/x86_64-linux-gnu/libboost_atomic.so.1.71.0  -lpthread
   OBJECT_DIR = CMakeFiles/MatchingEngine.dir
@@ -108,7 +114,7 @@ build rebuild_cache: phony CMakeFiles/rebuild_cache.util
 #############################################
 # Folder: /home/cheytakker/CLionProjects/EngineAndServer/cmake-build-debug
 
-build all: phony MatchingEngine
+build all: phony server_lib MatchingEngine
 
 # =============================================================================
 # Built-in targets
