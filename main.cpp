@@ -1,27 +1,46 @@
 // cpp_server.cpp
 
-#include <websocketpp/config/asio_no_tls.hpp>
-#include <websocketpp/server.hpp>
+
 #include <iostream>
 #include <chrono>
 #include <zmq.hpp>
 #include <string>
-#include <iostream>
 #include <thread>
-#include "websockets_data_publisher.h"
-#include "zmq_order_listener_updater.h"
 #include "worker_tasks.h"
 #include <fstream>
+#include <boost/asio.hpp>
+#include <memory>
+#include <mutex>
+#include "WebsocketLib.h"
+#include "ZMQLib.h"
+
+using tcp = boost::asio::ip::tcp;
+namespace websocket = boost::beast::websocket;
 
 int main() {
+//WEBSOCKETS BROADCAST OF MARKET DATA, ACCEPTING ANY AMOUNT OF NEW CONNECTIONS VIA CONTEXT:
+    // Asio setup
+    boost::asio::io_context io_context;
+    tcp::endpoint endpoint(tcp::v4(), 8080);
+    std::shared_ptr<Broadcaster> broadcaster = std::make_shared<Broadcaster>();
+    Server server(io_context, endpoint, broadcaster);
 
-    std::thread ws_thread([&](){
-        publish();
+    // Run io_context in a separate thread
+    std::thread io_context_thread([&io_context]() {
+        io_context.run();
     });
-    ws_thread.detach();
+
+//
+//    // Simulating sending messages in intervals
+//    for (int i = 0; i < 10; ++i) { // sending 10 messages
+//        std::this_thread::sleep_for(std::chrono::seconds(3));  // sleep for 5 seconds
+//        std::string message = "Market data update " + std::to_string(i + 1);
+//        broadcaster->broadcast(message);
+//    }
 
 
-    // Global THREADPOOL
+
+// Global THREADPOOL
     boost::asio::io_service io_service;
     // Use io_service with multiple worker threads
     const int NUM_WORKERS = 2;
@@ -34,18 +53,12 @@ int main() {
         worker.detach();
     }
 
-
-    zmq::context_t context(1);
-    // Socket to send order updates
-    zmq::socket_t update_socket(context, zmq::socket_type::push);
-    update_socket.connect("tcp://localhost:5556");
+//ZMQ SERVER TO ACCEPT ORDERS AND REGISTER THEM IN THREADPOOL FOR EXECUTION
+    ZMQServer zmqserver(io_service);
+    std::thread serverThread(&ZMQServer::run, &zmqserver);
 
 
-    std::thread zmq_thread([&]() {
-        zmq_accept_orders(context, update_socket, io_service);
-    });
-    zmq_thread.detach();
-
+//READ TXT FILE AND SCHEDULE UPDATE OF PRICES TO THE THREADPOOL
     std::ifstream infile("../price_updates.txt");
     std::string line;
     // Skip the header line
@@ -63,20 +76,23 @@ int main() {
 
         // Schedule using boost::asio::deadline_timer
         std::shared_ptr<boost::asio::deadline_timer> timer = std::make_shared<boost::asio::deadline_timer>(io_service, scheduled_time);
-        timer->async_wait([&price_mutex, relative_time, best_bid, best_ask, timer](const boost::system::error_code& /*e*/) {
-            update_price(relative_time, best_bid, best_ask, std::ref(price_mutex));
+        timer->async_wait([&price_mutex, relative_time, best_bid, best_ask, timer, broadcaster](const boost::system::error_code& /*e*/) {
+            update_price(broadcaster, relative_time, best_bid, best_ask, std::ref(price_mutex));
         });
     }
 
     while (true) {
         std::cout << "main is live \n";
-        std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::seconds(5));
     }
 
     // Join the zmq_thread if needed
-    zmq_thread.join();
-    ws_thread.join();
-
+    serverThread.join();
+    // Stopping and joining the thread running io_context
+    io_context.stop();
+    if (io_context_thread.joinable()) {
+        io_context_thread.join();
+    }
     return 0;
 
 }

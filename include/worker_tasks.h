@@ -13,11 +13,18 @@
 #include <string>
 #include <iostream>
 #include <thread>
+#include "WebsocketLib.h"
 
-void update_price(double relative_time, double best_bid, double best_ask, std::mutex& price_mutex) {
+void update_price(std::shared_ptr<Broadcaster> broadcaster, double relative_time, double best_bid, double best_ask, std::mutex& price_mutex) {
     std::lock_guard<std::mutex> lock(price_mutex);
 //    std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(relative_time * 1000)));
-    std::cout << "Updating price after " << relative_time << " seconds to: BID=" << best_bid << ", ASK=" << best_ask << "\n";
+    std::ostringstream oss;
+    oss << "Updating price after " << relative_time << " seconds to: BID=" << best_bid << ", ASK=" << best_ask;
+    std::string broadcast_msg = oss.str();
+
+    std::cout << broadcast_msg << "\n";
+    broadcaster->broadcast(broadcast_msg);
+
 }
 
 void process_order(const std::string& order_data, zmq::socket_t& update_socket) {

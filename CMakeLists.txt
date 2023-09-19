@@ -13,16 +13,18 @@ include_directories("/home/cheytakker/CLionProjects/websocketpp")
 
 include_directories(include)
 add_library(server_lib INTERFACE
-        include/worker_tasks.h)
+        include/worker_tasks.h
+        include/WebsocketLib.h
+        include/ZMQLib.h)
 target_include_directories(server_lib INTERFACE include)
 
 # Find ZeroMQ library
 find_library(ZMQ_LIBRARY NAMES zmq)
 
 add_executable(MatchingEngine main.cpp
-        include/websockets_data_publisher.h
-        include/zmq_order_listener_updater.h
-        include/worker_tasks.h)
+        include/worker_tasks.h
+        include/WebsocketLib.h
+        include/ZMQLib.h)
 
 # Link Boost libraries to your project
 target_link_libraries(MatchingEngine ${Boost_LIBRARIES} server_lib)
